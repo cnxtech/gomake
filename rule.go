@@ -47,13 +47,17 @@ func Evaluate(root *Rule) map[string]error {
 		rule := elem.Value.(*Rule)
 
 		// Skip if visited already
+		mu.Lock()
 		_, ok := errs[rule]
+		mu.Unlock()
 		if ok {
 			continue
 		}
 
 		// Mark as visited and create result channel
+		mu.Lock()
 		errs[rule] = make(chan error, 1)
+		mu.Unlock()
 
 		// Add dependencies to rules to visit
 		for _, dependency := range rule.Dependencies {
