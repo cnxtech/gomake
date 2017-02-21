@@ -13,7 +13,7 @@ type Gomakefile struct {
 	Targets map[string]*Rule
 }
 
-// NewGomakefile initializes a blank Gomakefile.
+// NewGomakefile initializes a Gomakefile that can rebuild itself.
 func NewGomakefile() *Gomakefile {
 	return &Gomakefile{
 		Targets: make(map[string]*Rule),

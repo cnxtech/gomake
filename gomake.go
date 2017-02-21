@@ -19,7 +19,7 @@ itself:
 	func main() {
 		gomakefile := gomake.NewGomakefile()
 
-		gomakeItself := gomakefile.AddRule("itself", "Builds gomake", nil, func() error {
+		rebuild := gomakefile.AddRule("gomake", "Rebuilds gomake", nil, func() error {
 			build := exec.Command("go", "build")
 			build.Stdout = os.Stdout
 			build.Stderr = os.Stderr
@@ -28,7 +28,7 @@ itself:
 		})
 
 		// Sets the default target
-		gomakefile.Targets[""] = gomakeItself
+		gomakefile.Targets[""] = rebuild
 
 		err := gomake.Gomake(gomakefile).Run(os.Args)
 		if err != nil {

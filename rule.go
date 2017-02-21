@@ -41,7 +41,7 @@ func Evaluate(root *Rule) map[string]error {
 		mu sync.Mutex
 	)
 
-	errs := make(map[*Rule]chan error)
+	resultChs := make(map[*Rule]chan error)
 
 	// Stall rule evaluation until all rules have been visited
 	mu.Lock()
@@ -49,17 +49,16 @@ func Evaluate(root *Rule) map[string]error {
 	queue := list.New()
 	queue.PushBack(root)
 	for elem := queue.Front(); elem != nil; elem = elem.Next() {
-
 		rule := elem.Value.(*Rule)
 
 		// Skip if visited already
-		_, ok := errs[rule]
+		_, ok := resultChs[rule]
 		if ok {
 			continue
 		}
 
 		// Mark as visited and create result channel
-		errs[rule] = make(chan error, 1)
+		resultChs[rule] = make(chan error, 1)
 
 		// Add dependencies to rules to visit
 		for _, dependency := range rule.Dependencies {
@@ -69,29 +68,7 @@ func Evaluate(root *Rule) map[string]error {
 		wg.Add(1)
 		go func(rule *Rule) {
 			defer wg.Done()
-
-			mu.Lock()
-			ruleCh := errs[rule]
-			mu.Unlock()
-
-			// Wait for dependencies to be evaluated
-			for _, dependency := range rule.Dependencies {
-				mu.Lock()
-				dependencyCh := errs[dependency]
-				mu.Unlock()
-
-				err := <-dependencyCh
-				dependencyCh <- err
-
-				// If any dependency returns err, exit early
-				if err != nil {
-					ruleCh <- nil
-					return
-				}
-			}
-
-			err := rule.Evaluate()
-			ruleCh <- err
+			evaluateRule(rule, &mu, resultChs)
 		}(rule)
 	}
 
@@ -101,11 +78,38 @@ func Evaluate(root *Rule) map[string]error {
 
 	// Build results map
 	results := make(map[string]error)
-	for rule, err := range errs {
+	for rule, err := range resultChs {
 		results[rule.Target] = <-err
 	}
 
 	return results
+}
+
+func evaluateRule(rule *Rule, mu *sync.Mutex, resultChs map[*Rule]chan error) {
+	mu.Lock()
+	ruleCh := resultChs[rule]
+	mu.Unlock()
+
+	// Wait for dependencies to be evaluated
+	for _, dependency := range rule.Dependencies {
+		mu.Lock()
+		dependencyCh := resultChs[dependency]
+		mu.Unlock()
+
+		// Grab a copy and return it to the channel so that all its dependents
+		// can take a look at its result
+		err := <-dependencyCh
+		dependencyCh <- err
+
+		// If any dependency returns err, exit early
+		if err != nil {
+			ruleCh <- nil
+			return
+		}
+	}
+
+	err := rule.Evaluate()
+	ruleCh <- err
 }
 
 // HandleResults displays all the target errs and returns a combined error.

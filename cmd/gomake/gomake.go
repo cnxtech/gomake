@@ -23,7 +23,7 @@ func main() {
 func NewGomakefile() *gomake.Gomakefile {
 	gomakefile := gomake.NewGomakefile()
 
-	gomakeItself := gomakefile.AddRule("itself", "Builds gomake", nil, func() error {
+	rebuild := gomakefile.AddRule("gomake", "Rebuilds gomake", nil, func() error {
 		build := exec.Command("go", "build", "cmd/gomake/gomake.go")
 		build.Stdout = os.Stdout
 		build.Stderr = os.Stderr
@@ -48,7 +48,7 @@ func NewGomakefile() *gomake.Gomakefile {
 		return nil
 	})
 
-	gomakefile.Targets[""] = gomakeItself
+	gomakefile.Targets[""] = rebuild
 
 	return gomakefile
 }
