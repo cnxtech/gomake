@@ -13,7 +13,11 @@ const (
 )
 
 func main() {
-	gomake.Gomake(NewGomakefile()).Run(os.Args)
+	err := gomake.Gomake(NewGomakefile()).Run(os.Args)
+	if err != nil {
+		fmt.Printf("%s", err)
+		os.Exit(-1)
+	}
 }
 
 func NewGomakefile() *gomake.Gomakefile {
@@ -27,7 +31,7 @@ func NewGomakefile() *gomake.Gomakefile {
 		return build.Run()
 	})
 
-	gomakefile.AddRule("test", "Tests all the packages", []*gomake.Rule{gomakeItself}, func() error {
+	gomakefile.AddRule("test", "Tests all the packages", nil, func() error {
 		test := exec.Command("go", "test", "./...")
 		test.Stdout = os.Stdout
 		test.Stderr = os.Stderr
