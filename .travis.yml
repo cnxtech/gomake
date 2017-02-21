@@ -14,5 +14,5 @@ matrix:
   - go: master
 
 script:
-- ./make
-- ./gomake test
+- make
+- gomake test
