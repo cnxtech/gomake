@@ -19,7 +19,7 @@ func main() {
 func NewGomakefile() *gomake.Gomakefile {
 	gomakefile := gomake.NewGomakefile()
 
-	goBuild := gomakefile.AddRule("gomake", "Builds gomake", nil, func() error {
+	gomakeItself := gomakefile.AddRule("itself", "Builds gomake", nil, func() error {
 		build := exec.Command("go", "build", "cmd/gomake/gomake.go")
 		build.Stdout = os.Stdout
 		build.Stderr = os.Stderr
@@ -27,7 +27,7 @@ func NewGomakefile() *gomake.Gomakefile {
 		return build.Run()
 	})
 
-	gomakefile.AddRule("test", "Tests all the packages", []*gomake.Rule{goBuild}, func() error {
+	gomakefile.AddRule("test", "Tests all the packages", []*gomake.Rule{gomakeItself}, func() error {
 		test := exec.Command("go", "test", "./...")
 		test.Stdout = os.Stdout
 		test.Stderr = os.Stderr
@@ -44,7 +44,7 @@ func NewGomakefile() *gomake.Gomakefile {
 		return nil
 	})
 
-	gomakefile.Targets[""] = goBuild
+	gomakefile.Targets[""] = gomakeItself
 
 	return gomakefile
 }
