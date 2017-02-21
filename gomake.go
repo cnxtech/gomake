@@ -19,7 +19,7 @@ itself:
 	func main() {
 		gomakefile := gomake.NewGomakefile()
 
-		gomakeItself := gomakefile.AddRule("gomake", "Builds gomake", nil, func() error {
+		gomakeItself := gomakefile.AddRule("itself", "Builds gomake", nil, func() error {
 			build := exec.Command("go", "build")
 			build.Stdout = os.Stdout
 			build.Stderr = os.Stderr
