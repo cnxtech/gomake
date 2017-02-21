@@ -35,13 +35,15 @@ func NewRule(target, description string, dependencies []*Rule, evaluate func() e
 // error, it will exit early.
 func Evaluate(root *Rule) map[string]error {
 	var (
-		wg sync.WaitGroup // Waits for all goroutines in rule's dependency graph
-		mu sync.Mutex     // Protects errs map
+		// Waits for all goroutines in rule's dependency graph to finish evaluating
+		wg sync.WaitGroup
+		// Protects errs map
+		mu sync.Mutex
 	)
 
 	errs := make(map[*Rule]chan error)
 
-	// Protect errs map until all goroutines are started
+	// Stall rule evaluation until all rules have been visited
 	mu.Lock()
 
 	queue := list.New()
@@ -93,7 +95,7 @@ func Evaluate(root *Rule) map[string]error {
 		}(rule)
 	}
 
-	// Unlock so that rules can start evaluating
+	// Rules can begin evaluating
 	mu.Unlock()
 	wg.Wait()
 
