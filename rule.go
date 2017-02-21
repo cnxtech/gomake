@@ -38,7 +38,11 @@ func Evaluate(root *Rule) map[string]error {
 		wg sync.WaitGroup // Waits for all goroutines in rule's dependency graph
 		mu sync.Mutex     // Protects errs map
 	)
+
 	errs := make(map[*Rule]chan error)
+
+	// Protect errs map until all goroutines are started
+	mu.Lock()
 
 	queue := list.New()
 	queue.PushBack(root)
@@ -47,17 +51,13 @@ func Evaluate(root *Rule) map[string]error {
 		rule := elem.Value.(*Rule)
 
 		// Skip if visited already
-		mu.Lock()
 		_, ok := errs[rule]
-		mu.Unlock()
 		if ok {
 			continue
 		}
 
 		// Mark as visited and create result channel
-		mu.Lock()
 		errs[rule] = make(chan error, 1)
-		mu.Unlock()
 
 		// Add dependencies to rules to visit
 		for _, dependency := range rule.Dependencies {
@@ -93,6 +93,8 @@ func Evaluate(root *Rule) map[string]error {
 		}(rule)
 	}
 
+	// Unlock so that rules can start evaluating
+	mu.Unlock()
 	wg.Wait()
 
 	// Build results map
