@@ -4,24 +4,37 @@ import (
 	"bytes"
 	"errors"
 	"strings"
+	"sync"
 	"testing"
 )
 
 func TestEvaluate(t *testing.T) {
-	var actual []byte
+	var (
+		actual []byte
+		// Protects actual byte array
+		mu sync.Mutex
+	)
 	rule1 := NewRule("", "", nil, func() error {
+		mu.Lock()
+		defer mu.Unlock()
 		actual = append(actual, '1')
 		return nil
 	})
 	rule2 := NewRule("", "", nil, func() error {
+		mu.Lock()
+		defer mu.Unlock()
 		actual = append(actual, '1')
 		return nil
 	})
 	rule3 := NewRule("", "", []*Rule{rule1, rule2}, func() error {
+		mu.Lock()
+		defer mu.Unlock()
 		actual = append(actual, '2')
 		return nil
 	})
 	rule4 := NewRule("", "", []*Rule{rule2, rule3}, func() error {
+		mu.Lock()
+		defer mu.Unlock()
 		actual = append(actual, '3')
 		return nil
 	})
@@ -38,12 +51,20 @@ func TestEvaluate(t *testing.T) {
 }
 
 func TestEvaluateErr(t *testing.T) {
-	var actual []byte
+	var (
+		actual []byte
+		// Protects actual byte array
+		mu sync.Mutex
+	)
 	rule1 := NewRule("", "", nil, func() error {
+		mu.Lock()
+		defer mu.Unlock()
 		actual = append(actual, '1')
 		return nil
 	})
 	rule2 := NewRule("", "", []*Rule{rule1}, func() error {
+		mu.Lock()
+		defer mu.Unlock()
 		actual = append(actual, '2')
 		return nil
 	})
@@ -52,10 +73,14 @@ func TestEvaluateErr(t *testing.T) {
 		return intentional
 	})
 	rule4 := NewRule("", "", []*Rule{rule2, rule3}, func() error {
+		mu.Lock()
+		defer mu.Unlock()
 		actual = append(actual, '3')
 		return nil
 	})
 	rule5 := NewRule("", "", []*Rule{rule3}, func() error {
+		mu.Lock()
+		defer mu.Unlock()
 		actual = append(actual, '4')
 		return nil
 	})
