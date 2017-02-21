@@ -1,0 +1,38 @@
+package gomake
+
+import "errors"
+
+var (
+	ErrNoSuchTarget = errors.New("no such target")
+)
+
+// Gomakefile is a Makefile representation for gophers
+type Gomakefile struct {
+	Targets map[string]*Rule
+}
+
+// NewGomakefile initializes a blank Gomakefile
+func NewGomakefile() *Gomakefile {
+	return &Gomakefile{
+		Targets: make(map[string]*Rule),
+	}
+}
+
+// AddRule creates a new rule and adds it to the Gomakefile
+func (g *Gomakefile) AddRule(target, description string, dependencies []*Rule, evaluate func() error) *Rule {
+	rule := NewRule(target, description, dependencies, evaluate)
+	g.Targets[target] = rule
+	return rule
+}
+
+// Make makes the target rule and its dependencies
+func (g *Gomakefile) Make(target string) map[string]error {
+	rule, ok := g.Targets[target]
+	if !ok {
+		return map[string]error{
+			target: ErrNoSuchTarget,
+		}
+	}
+
+	return Evaluate(rule)
+}

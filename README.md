@@ -1,0 +1,3 @@
+# gomake
+
+Makefile for gophers
