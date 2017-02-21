@@ -1,3 +1,42 @@
+/*
+Package gomake provides a makefile-like syntax to define rules and their
+dependencies.
+
+gomake is designed to be imported and used to create a main package with rules
+to make your program. We can start off by writing a Gomakefile that will build
+itself:
+
+	package main
+
+	import (
+		"fmt"
+		"os"
+		"os/exec"
+
+		"github.com/hinshun/gomake"
+	)
+
+	func main() {
+		gomakefile := gomake.NewGomakefile()
+
+		gomakeItself := gomakefile.AddRule("gomake", "Builds gomake", nil, func() error {
+			build := exec.Command("go", "build")
+			build.Stdout = os.Stdout
+			build.Stderr = os.Stderr
+
+			return build.Run()
+		})
+
+		// Sets the default target
+		gomakefile.Targets[""] = gomakeItself
+
+		err := gomake.Gomake(gomakefile).Run(os.Args)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(-1)
+		}
+	}
+*/
 package gomake
 
 import (
