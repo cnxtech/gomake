@@ -218,7 +218,7 @@ var HelpFlag = &Flag{
 	Usage:   "show help",
 }
 
-// VersionFlag is the flag to display the App's vesrion text
+// VersionFlag is the flag to display the App's version text
 var VersionFlag = &Flag{
 	Name:    "version",
 	Aliases: []string{"v"},
