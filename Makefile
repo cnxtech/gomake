@@ -1,2 +1,2 @@
 gomake:
-	go build cmd/gomake/gomake.go
+	go build -race cmd/gomake/gomake.go
