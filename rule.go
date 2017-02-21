@@ -8,9 +8,9 @@ import (
 
 // Rule is a node in a dependency graph.
 type Rule struct {
-	// Target is the identifier for the rule in the results from Evaluate
+	// Target is the identifier for the rule in the results from Evaluate.
 	Target string
-	// Description is an optional field describing the rule
+	// Description is an optional field describing the rule.
 	Description string
 	// Dependencies is a list of rules that must be evaluated before this.
 	Dependencies []*Rule
@@ -97,7 +97,7 @@ func Evaluate(root *Rule) map[string]error {
 	return results
 }
 
-// HandleResults displays all the target errs and returns a combined error
+// HandleResults displays all the target errs and returns a combined error.
 func HandleResults(results map[string]error) error {
 	var errs []error
 	for target, err := range results {

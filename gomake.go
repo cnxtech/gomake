@@ -7,10 +7,11 @@ import (
 )
 
 const (
+	// Version is the current version of gomake.
 	Version = "0.1.0"
 )
 
-// Gomake creates a cli app for the given Gomakefile
+// Gomake creates a cli app for the given Gomakefile.
 func Gomake(gomakefile *Gomakefile) *cli.App {
 	app := &cli.App{
 		Name:    "gomake",

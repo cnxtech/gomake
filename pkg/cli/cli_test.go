@@ -49,7 +49,12 @@ func TestNewContext(t *testing.T) {
 		Action: func(ctx *Context) error {
 			return expected
 		},
-		Flags: []*Flag{helpFlag},
+		Flags: []*Flag{
+			{
+				Name:    "help",
+				Aliases: []string{"h"},
+			},
+		},
 		Commands: Commands{
 			{
 				Name: "gomake",

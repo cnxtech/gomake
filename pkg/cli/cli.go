@@ -10,20 +10,27 @@ import (
 )
 
 var (
+	// ErrIncorrectUsage is returned when the App is ran with bad arguments.
 	ErrIncorrectUsage = errors.New("incorrect usage")
 )
 
-// App is a simple cli application
+// App is a simple cli application.
 type App struct {
-	Name     string
-	Usage    string
-	Version  string
-	Action   func(ctx *Context) error
+	// Name is the name of the program.
+	Name string
+	// Usage is a brief description of the program.
+	Usage string
+	// Version is the version of the program.
+	Version string
+	// Action is the default action to execute when no subcommands are specified.
+	Action func(ctx *Context) error
+	// Commands is the list of subcommands the program can run.
 	Commands Commands
-	Flags    []*Flag
+	// Flags is the list of boolean flags that can be enabled.
+	Flags []*Flag
 }
 
-// Run runs the App with the given args and shows help on errors
+// Run runs the App with the given args and shows help on errors.
 func (a *App) Run(args []string) error {
 	a.setup()
 
@@ -33,12 +40,12 @@ func (a *App) Run(args []string) error {
 		return err
 	}
 
-	if context.IsSet(helpFlag.Name) {
+	if context.IsSet(HelpFlag.Name) {
 		a.ShowHelp()
 		return nil
 	}
 
-	if context.IsSet(versionFlag.Name) {
+	if context.IsSet(VersionFlag.Name) {
 		a.ShowVersion()
 		return nil
 	}
@@ -46,7 +53,7 @@ func (a *App) Run(args []string) error {
 	return context.Action()
 }
 
-// ShowHelp displays the help text for the App
+// ShowHelp displays the help text for the App.
 func (a *App) ShowHelp() error {
 	src := `NAME:
    {{.Name}} - {{.Usage}}
@@ -79,13 +86,13 @@ OPTIONS:{{range .Flags}}
 	return nil
 }
 
-// ShowHelp displays the version text for the App
+// ShowHelp displays the version text for the App.
 func (a *App) ShowVersion() {
 	fmt.Printf("%v version %v\n", a.Name, a.Version)
 }
 
 func (a *App) setup() {
-	a.Flags = append(a.Flags, helpFlag, versionFlag)
+	a.Flags = append(a.Flags, HelpFlag, VersionFlag)
 
 	if a.Version == "" {
 		a.Version = "0.0.0"
@@ -98,38 +105,43 @@ func (a *App) setup() {
 	}
 }
 
-// Command is a subcommand for a App
+// Command is a subcommand for an App.
 type Command struct {
-	Name        string
+	// Name is the name of the subcommand.
+	Name string
+	// Description is a brief text about the subcommand.
 	Description string
-	Action      func(ctx *Context) error
+	// Action is the function to call when the command is invoked.
+	Action func(ctx *Context) error
 }
 
 type Commands []*Command
 
-// Len returns the length of commands
+// Len returns the length of commands.
 func (c Commands) Len() int {
 	return len(c)
 }
 
-// Len returns whether the command at index i is less than at index j
+// Len returns whether the command at index i is less than at index j.
 func (c Commands) Less(i, j int) bool {
 	return c[i].Name < c[j].Name
 }
 
-// Swap swaps the commands at index i and j
+// Swap swaps the commands at index i and j.
 func (c Commands) Swap(i, j int) {
 	c[i], c[j] = c[j], c[i]
 }
 
-// Context is the context is which an Action is ran
+// Context is the context is which an Action is ran.
 type Context struct {
-	Action  func() error
+	// Action is the context wrapped function to be evaluated.
+	Action func() error
+
 	flagSet map[string]struct{}
 }
 
 // NewContext parses arguments and returns a context for what action to run
-// and what flags are enabled
+// and what flags are enabled.
 func NewContext(app *App, args []string) (*Context, error) {
 	// Parse the flags first
 	flagSet := make(map[string]struct{})
@@ -183,27 +195,32 @@ func NewContext(app *App, args []string) (*Context, error) {
 	return context, nil
 }
 
-// IsSet returns whether flag with name is enabled
+// IsSet returns whether flag with name is enabled.
 func (c *Context) IsSet(name string) bool {
 	_, ok := c.flagSet[name]
 	return ok
 }
 
-// Flag is a boolean flag that gets passed down to the action called
+// Flag is a boolean flag that gets passed down to the action called.
 type Flag struct {
-	Name    string
+	// Name is the name of this flag.
+	Name string
+	// Aliases is the list of alternate names to enable the flag.
 	Aliases []string
-	Usage   string
+	// Usage is a brief description of what the flag is for.
+	Usage string
 }
 
-var versionFlag = &Flag{
-	Name:    "version",
-	Aliases: []string{"v"},
-	Usage:   "print the version",
-}
-
-var helpFlag = &Flag{
+// HelpFlag is the flag to display the App's help text
+var HelpFlag = &Flag{
 	Name:    "help",
 	Aliases: []string{"h"},
 	Usage:   "show help",
+}
+
+// VersionFlag is the flag to display the App's vesrion text
+var VersionFlag = &Flag{
+	Name:    "version",
+	Aliases: []string{"v"},
+	Usage:   "print the version",
 }
