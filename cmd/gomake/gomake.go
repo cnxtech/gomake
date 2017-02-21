@@ -23,23 +23,25 @@ func main() {
 func NewGomakefile() *gomake.Gomakefile {
 	gomakefile := gomake.NewGomakefile()
 
-	rebuild := gomakefile.AddRule("gomake", "Rebuilds gomake", nil, func() error {
-		build := exec.Command("go", "build", "cmd/gomake/gomake.go")
-		build.Stdout = os.Stdout
-		build.Stderr = os.Stderr
+	rebuild := gomakefile.AddRule("gomake", nil, func() error {
+		cmd := exec.Command("go", "build", "cmd/gomake/gomake.go")
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
 
-		return build.Run()
+		return cmd.Run()
 	})
+	rebuild.Description = "Rebuilds gomake"
 
-	gomakefile.AddRule("test", "Tests all the packages", nil, func() error {
-		test := exec.Command("go", "test", "./...")
-		test.Stdout = os.Stdout
-		test.Stderr = os.Stderr
+	test := gomakefile.AddRule("test", nil, func() error {
+		cmd := exec.Command("go", "test", "./...")
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
 
-		return test.Run()
+		return cmd.Run()
 	})
+	test.Description = "Tests all the packages"
 
-	gomakefile.AddRule("clean", "Removes gomake", nil, func() error {
+	clean := gomakefile.AddRule("clean", nil, func() error {
 		err := os.Remove("gomake")
 		if err != nil {
 			fmt.Printf("%s\n", err)
@@ -47,6 +49,7 @@ func NewGomakefile() *gomake.Gomakefile {
 
 		return nil
 	})
+	clean.Description = "Removes gomake"
 
 	gomakefile.Targets[""] = rebuild
 

@@ -3,16 +3,16 @@ package cli
 var (
 	// HelpFlag is the flag to display the App's help text
 	HelpFlag = &Flag{
-		Name:    "help",
-		Aliases: []string{"h"},
-		Usage:   "show help",
+		Name:        "help",
+		Aliases:     []string{"h"},
+		Description: "show help",
 	}
 
 	// VersionFlag is the flag to display the App's version text
 	VersionFlag = &Flag{
-		Name:    "version",
-		Aliases: []string{"v"},
-		Usage:   "print the version",
+		Name:        "version",
+		Aliases:     []string{"v"},
+		Description: "print the version",
 	}
 )
 
@@ -22,11 +22,11 @@ type Flag struct {
 	Name string
 	// Aliases is the list of alternate names to enable the flag.
 	Aliases []string
-	// Usage is a brief description of what the flag is for.
-	Usage string
+	// Description is a brief text of what the flag enables.
+	Description string
 }
 
-// HasName returns true if name matches the flag's name or its aliases
+// HasName returns true if name matches the flag's name or its aliases.
 func (f *Flag) HasName(name string) bool {
 	aliases := append([]string{f.Name}, f.Aliases...)
 	for _, alias := range aliases {
@@ -36,4 +36,18 @@ func (f *Flag) HasName(name string) bool {
 	}
 
 	return false
+}
+
+// Flags is a list of flags.
+type Flags []*Flag
+
+// HasName returns true if any flag in Flags matches name.
+func (f Flags) NameForAlias(alias string) string {
+	for _, flag := range f {
+		if flag.HasName(alias) {
+			return flag.Name
+		}
+	}
+
+	return ""
 }

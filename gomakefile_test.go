@@ -8,7 +8,7 @@ import (
 func TestAddRule(t *testing.T) {
 	gomakefile := NewGomakefile()
 	var expected = errors.New("expected")
-	gomakefile.AddRule("target", "", nil, func() error {
+	gomakefile.AddRule("target", nil, func() error {
 		return expected
 	})
 
@@ -31,7 +31,7 @@ func TestMake(t *testing.T) {
 	}
 
 	var expected = errors.New("expected")
-	rule := gomakefile.AddRule("target", "", nil, func() error {
+	rule := gomakefile.AddRule("target", nil, func() error {
 		return expected
 	})
 

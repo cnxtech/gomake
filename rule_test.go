@@ -14,25 +14,25 @@ func TestEvaluate(t *testing.T) {
 		// Protects actual byte array
 		mu sync.Mutex
 	)
-	rule1 := NewRule("", "", nil, func() error {
+	rule1 := NewRule("", nil, func() error {
 		mu.Lock()
 		defer mu.Unlock()
 		actual = append(actual, '1')
 		return nil
 	})
-	rule2 := NewRule("", "", nil, func() error {
+	rule2 := NewRule("", nil, func() error {
 		mu.Lock()
 		defer mu.Unlock()
 		actual = append(actual, '1')
 		return nil
 	})
-	rule3 := NewRule("", "", []*Rule{rule1, rule2}, func() error {
+	rule3 := NewRule("", []*Rule{rule1, rule2}, func() error {
 		mu.Lock()
 		defer mu.Unlock()
 		actual = append(actual, '2')
 		return nil
 	})
-	rule4 := NewRule("", "", []*Rule{rule2, rule3}, func() error {
+	rule4 := NewRule("", []*Rule{rule2, rule3}, func() error {
 		mu.Lock()
 		defer mu.Unlock()
 		actual = append(actual, '3')
@@ -56,35 +56,35 @@ func TestEvaluateErr(t *testing.T) {
 		// Protects actual byte array
 		mu sync.Mutex
 	)
-	rule1 := NewRule("", "", nil, func() error {
+	rule1 := NewRule("", nil, func() error {
 		mu.Lock()
 		defer mu.Unlock()
 		actual = append(actual, '1')
 		return nil
 	})
-	rule2 := NewRule("", "", []*Rule{rule1}, func() error {
+	rule2 := NewRule("", []*Rule{rule1}, func() error {
 		mu.Lock()
 		defer mu.Unlock()
 		actual = append(actual, '2')
 		return nil
 	})
 	intentional := errors.New("intentional")
-	rule3 := NewRule("error", "", []*Rule{rule1}, func() error {
+	rule3 := NewRule("error", []*Rule{rule1}, func() error {
 		return intentional
 	})
-	rule4 := NewRule("", "", []*Rule{rule2, rule3}, func() error {
+	rule4 := NewRule("", []*Rule{rule2, rule3}, func() error {
 		mu.Lock()
 		defer mu.Unlock()
 		actual = append(actual, '3')
 		return nil
 	})
-	rule5 := NewRule("", "", []*Rule{rule3}, func() error {
+	rule5 := NewRule("", []*Rule{rule3}, func() error {
 		mu.Lock()
 		defer mu.Unlock()
 		actual = append(actual, '4')
 		return nil
 	})
-	rule6 := NewRule("", "", []*Rule{rule4, rule5}, func() error {
+	rule6 := NewRule("", []*Rule{rule4, rule5}, func() error {
 		return nil
 	})
 

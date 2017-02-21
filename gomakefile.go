@@ -21,8 +21,8 @@ func NewGomakefile() *Gomakefile {
 }
 
 // AddRule creates a new rule and adds it to the Gomakefile.
-func (g *Gomakefile) AddRule(target, description string, dependencies []*Rule, evaluate func() error) *Rule {
-	rule := NewRule(target, description, dependencies, evaluate)
+func (g *Gomakefile) AddRule(target string, dependencies []*Rule, evaluate func() error) *Rule {
+	rule := NewRule(target, dependencies, evaluate)
 	g.Targets[target] = rule
 	return rule
 }

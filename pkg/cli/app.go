@@ -21,8 +21,6 @@ type Action func(ctx *Context) error
 type App struct {
 	// Name is the name of the program.
 	Name string
-	// Usage is a brief description of the program.
-	Usage string
 	// Version is the version of the program.
 	Version string
 	// Action is the default action to execute when no subcommands are specified.
@@ -30,7 +28,7 @@ type App struct {
 	// Commands is the list of subcommands the program can run.
 	Commands Commands
 	// Flags is the list of boolean flags that can be enabled.
-	Flags []*Flag
+	Flags Flags
 }
 
 // Run runs the App with the given args and shows help on errors.
@@ -74,7 +72,7 @@ func (a *App) initialize() {
 // ShowHelp displays the help text for the App.
 func (a *App) ShowHelp() error {
 	src := `NAME:
-   {{.Name}} - {{.Usage}}
+   {{.Name}}
 
 USAGE:
    {{.Name}} [options]{{if .Commands}} command{{end}}
@@ -86,7 +84,7 @@ COMMANDS:{{range .Commands}}
    {{.Name}}{{if .Description}}{{"\t"}}{{.Description}}{{end}}{{end}}
 
 OPTIONS:{{range .Flags}}
-   --{{.Name}}{{if .Aliases}}, {{join .Aliases ", "}}{{end}}{{"\t"}}{{.Usage}}{{end}}
+   --{{.Name}}{{if .Aliases}}, {{join .Aliases ", "}}{{end}}{{"\t"}}{{.Description}}{{end}}
 `
 	funcMap := template.FuncMap{
 		"join": strings.Join,

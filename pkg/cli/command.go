@@ -10,6 +10,7 @@ type Command struct {
 	Action Action
 }
 
+// Commands is a sortable list of commands.
 type Commands []*Command
 
 // Len returns the length of commands.
@@ -25,4 +26,14 @@ func (c Commands) Less(i, j int) bool {
 // Swap swaps the commands at index i and j.
 func (c Commands) Swap(i, j int) {
 	c[i], c[j] = c[j], c[i]
+}
+
+func (c Commands) ActionForName(name string) Action {
+	for _, command := range c {
+		if name == command.Name {
+			return command.Action
+		}
+	}
+
+	return nil
 }

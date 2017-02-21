@@ -9,7 +9,7 @@ import (
 func TestGomake(t *testing.T) {
 	gomakefile := NewGomakefile()
 
-	gomakefile.AddRule("test", "", nil, func() error {
+	gomakefile.AddRule("test", nil, func() error {
 		build := exec.Command("go", "test", "github.com/goodsport/gomake/pkg/dependency")
 		build.Stdout = os.Stdout
 		build.Stderr = os.Stderr

@@ -20,10 +20,9 @@ type Rule struct {
 
 // NewRule initializes a new named Rule with its direct dependencies and
 // evaluate function.
-func NewRule(target, description string, dependencies []*Rule, evaluate func() error) *Rule {
+func NewRule(target string, dependencies []*Rule, evaluate func() error) *Rule {
 	return &Rule{
 		Target:       target,
-		Description:  description,
 		Dependencies: dependencies,
 		Evaluate:     evaluate,
 	}
@@ -34,6 +33,19 @@ func NewRule(target, description string, dependencies []*Rule, evaluate func() e
 // evaluated before evaluating itself, but if any dependency evaluates with an
 // error, it will exit early.
 func Evaluate(root *Rule) map[string]error {
+	// Traverse dependency graph and create goroutines for all rules
+	resultChs := evaluateAllRules(root)
+
+	// Build results map
+	results := make(map[string]error)
+	for rule, err := range resultChs {
+		results[rule.Target] = <-err
+	}
+
+	return results
+}
+
+func evaluateAllRules(root *Rule) map[*Rule]chan error {
 	var (
 		// Waits for all goroutines in rule's dependency graph to finish evaluating
 		wg sync.WaitGroup
@@ -75,14 +87,7 @@ func Evaluate(root *Rule) map[string]error {
 	// Rules can begin evaluating
 	mu.Unlock()
 	wg.Wait()
-
-	// Build results map
-	results := make(map[string]error)
-	for rule, err := range resultChs {
-		results[rule.Target] = <-err
-	}
-
-	return results
+	return resultChs
 }
 
 func evaluateRule(rule *Rule, mu *sync.Mutex, resultChs map[*Rule]chan error) {

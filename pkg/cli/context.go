@@ -42,7 +42,7 @@ func (c *Context) IsSet(name string) bool {
 }
 
 // ParseFlags parses the args and returns a map of flags set.
-func ParseFlags(flags []*Flag, args []string) map[string]struct{} {
+func ParseFlags(flags Flags, args []string) map[string]struct{} {
 	flagSet := make(map[string]struct{})
 
 	for _, arg := range args {
@@ -50,12 +50,10 @@ func ParseFlags(flags []*Flag, args []string) map[string]struct{} {
 			break
 		}
 
-		flagName := strings.TrimLeft(arg, "--")
-		for _, flag := range flags {
-			if flag.HasName(flagName) {
-				flagSet[flag.Name] = struct{}{}
-				break
-			}
+		alias := strings.TrimLeft(arg, "--")
+		name := flags.NameForAlias(alias)
+		if name != "" {
+			flagSet[name] = struct{}{}
 		}
 	}
 
@@ -72,11 +70,7 @@ func ParseCommands(defaultAction Action, commands Commands, args []string) Actio
 	} else if len(args) == 1 {
 		// Subcommands not supported, so only if there is one command, take that
 		// command's Action
-		for _, command := range commands {
-			if args[0] == command.Name {
-				action = command.Action
-			}
-		}
+		action = commands.ActionForName(args[0])
 	}
 
 	return action

@@ -19,10 +19,10 @@ itself:
 	func main() {
 		gomakefile := gomake.NewGomakefile()
 
-		rebuild := gomakefile.AddRule("gomake", "Rebuilds gomake", nil, func() error {
-			build := exec.Command("go", "build")
-			build.Stdout = os.Stdout
-			build.Stderr = os.Stderr
+		rebuild := gomakefile.AddRule("gomake", nil, func() error {
+			cmd := exec.Command("go", "build")
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
 
 			return build.Run()
 		})
@@ -53,8 +53,7 @@ const (
 // Gomake creates a cli app for the given Gomakefile.
 func Gomake(gomakefile *Gomakefile) *cli.App {
 	app := &cli.App{
-		Name:    "gomake",
-		Usage:   "Makefile for gophers",
+		Name:    "gomake - Makefile for gophers",
 		Version: Version,
 		Action: func(ctx *cli.Context) error {
 			_, ok := gomakefile.Targets[""]
