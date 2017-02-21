@@ -15,4 +15,4 @@ matrix:
 
 script:
 - make
-- gomake test
+- ./gomake test
