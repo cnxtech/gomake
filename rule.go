@@ -63,26 +63,29 @@ func Evaluate(root *Rule) map[string]error {
 		wg.Add(1)
 		go func(rule *Rule) {
 			defer wg.Done()
+
+			mu.Lock()
+			ruleCh := errs[rule]
+			mu.Unlock()
+
 			// Wait for dependencies to be evaluated
 			for _, dependency := range rule.Dependencies {
-				err := <-errs[dependency]
 				mu.Lock()
-				errs[dependency] <- err
+				dependencyCh := errs[dependency]
 				mu.Unlock()
+
+				err := <-dependencyCh
+				dependencyCh <- err
 
 				// If any dependency returns err, exit early
 				if err != nil {
-					mu.Lock()
-					errs[rule] <- nil
-					mu.Unlock()
+					ruleCh <- nil
 					return
 				}
 			}
 
 			err := rule.Evaluate()
-			mu.Lock()
-			errs[rule] <- err
-			mu.Unlock()
+			ruleCh <- err
 		}(rule)
 	}
 
