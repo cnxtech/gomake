@@ -46,17 +46,13 @@ func Evaluate(root *Rule) map[string]error {
 }
 
 func evaluateAllRules(root *Rule) map[*Rule]chan error {
-	var (
-		// Waits for all goroutines in rule's dependency graph to finish evaluating
-		wg sync.WaitGroup
-		// Protects errs map
-		mu sync.Mutex
-	)
+	// Waits for all goroutines in rule's dependency graph to finish evaluating
+	var wg sync.WaitGroup
 
 	resultChs := make(map[*Rule]chan error)
 
 	// Stall rule evaluation until all rules have been visited
-	mu.Lock()
+	start := make(chan struct{})
 
 	queue := list.New()
 	queue.PushBack(root)
@@ -80,26 +76,23 @@ func evaluateAllRules(root *Rule) map[*Rule]chan error {
 		wg.Add(1)
 		go func(rule *Rule) {
 			defer wg.Done()
-			evaluateRule(rule, &mu, resultChs)
+			<-start
+			evaluateRule(rule, resultChs)
 		}(rule)
 	}
 
 	// Rules can begin evaluating
-	mu.Unlock()
+	close(start)
 	wg.Wait()
 	return resultChs
 }
 
-func evaluateRule(rule *Rule, mu *sync.Mutex, resultChs map[*Rule]chan error) {
-	mu.Lock()
+func evaluateRule(rule *Rule, resultChs map[*Rule]chan error) {
 	ruleCh := resultChs[rule]
-	mu.Unlock()
 
 	// Wait for dependencies to be evaluated
 	for _, dependency := range rule.Dependencies {
-		mu.Lock()
 		dependencyCh := resultChs[dependency]
-		mu.Unlock()
 
 		// Grab a copy and return it to the channel so that all its dependents
 		// can take a look at its result
